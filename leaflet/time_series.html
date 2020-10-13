@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <meta name="description" content="">
+
+
+  <title>Dyna Crop</title>
+  <!-- plotly -->
+  <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+  <script src="functions.js"></script>
+
+</head>
+<body>
+
+<div id="figure_time_series" style="width:100%;height:400px; text-align: center; "></div>
+
+<script>
+$(window).on('load', function() {
+  // polygon id (from picker.html)
+  var polygon_id = 1;
+  // values from date picker
+  var date_from =  "2018-01-01";
+  var date_to =  "2018-12-17";
+  // NDVI, FAPAR etc. (see https://dynacrop.worldfromspace.cz/docs/#/products)
+  var layer = "NDVI";
+  var rendering_type = "time_series";
+
+  var whenDone = function(data) {
+    var data_to_plot = [
+      {
+        x: data['result']['time_series']['dates'],
+        y: data['result']['time_series']['values'],
+        type: 'scatter'
+      }
+      ];
+      Plotly.newPlot("figure_time_series", data_to_plot);
+  };
+
+  post_rendering_request(polygon_id, rendering_type, date_from, date_to, layer, whenDone);
+});
+
+</script>
+</body>
+</html>

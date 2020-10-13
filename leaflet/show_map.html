@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/georaster"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet/georaster-layer-for-leaflet.browserify.min.js"></script>
+    <script src="functions.js"></script>
+    <script src="https://cdn.rawgit.com/mapbox/wellknown/master/wellknown.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+
+
+    <style>
+      #map {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+    $(window).on('load', function() {
+      // initalize leaflet map
+      var map = L.map('map', {
+          minZoom: 0,
+          maxZoom: 18
+      });
+
+      // polygon id (from picker.html)
+      var polygon_id = 1;
+      // values from date picker
+      var date_from =  "2018-05-15";
+      var date_to =  "2018-12-17";
+      // NDVI, FAPAR etc. (see https://dynacrop.worldfromspace.cz/docs/#/products)
+      var layer = "NDVI";
+
+      // new!
+      // observation vs. field_zonation
+      var rendering_type = "field_zonation";
+      // var rendering_type = "observation";
+
+      // add Google basemap
+      L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+          subdomains:['mt0','mt1','mt2','mt3']
+        }).addTo(map);
+
+      // new! render using tile layer.
+      var whenDone = function(result) { addTileLayer(result['result']['color'], result['polygon']['geometry'], map); };
+      post_rendering_request(polygon_id, rendering_type, date_from, date_to, layer, whenDone);
+    });
+    </script>
+  </body>
+</html>
