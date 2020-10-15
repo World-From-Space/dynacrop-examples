@@ -6,7 +6,6 @@
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <script src="https://unpkg.com/georaster"></script>
     <script src="https://unpkg.com/georaster-layer-for-leaflet/georaster-layer-for-leaflet.browserify.min.js"></script>
-    <script src="functions.js"></script>
     <script src="https://cdn.rawgit.com/mapbox/wellknown/master/wellknown.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 
@@ -44,7 +43,7 @@
       let searchParams = new URLSearchParams(window.location.search);
       if(searchParams.has('url')){
         var final_tile_url = tiles_url+searchParams.get("url");
-        if(searchParams.get('url').includes("one_band")){
+        if(searchParams.get('url').includes("raw_int")){
               if (searchParams.has('color_map')) {
                   final_tile_url += "&color_map="+searchParams.get('color_map');
               }
