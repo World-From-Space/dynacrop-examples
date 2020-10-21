@@ -22,14 +22,16 @@
 
 <script>
 $(window).on('load', function() {
-  // polygon id (from picker.html)
-  var polygon_id = 1;
-  // values from date picker
-  var date_from =  "2018-01-01";
-  var date_to =  "2018-12-17";
-  // NDVI, FAPAR etc. (see https://dynacrop.worldfromspace.cz/docs/#/products)
-  var layer = "NDVI";
-  var rendering_type = "time_series";
+
+  setApiKey("api_key");
+  
+  // prepare data
+  var data = { "polygon_id": 1,
+               "rendering_type": "time_series", // rendering_types: observation or field_zonation
+               "date_from": "2018-05-15",
+               "date_to": "2018-12-17",
+               "layer": "NDVI" }; // e.g NDVI, FAPAR etc. (see https://dynacrop.worldfromspace.cz/docs/#/products)
+
 
   var whenDone = function(data) {
     var data_to_plot = [
@@ -42,7 +44,7 @@ $(window).on('load', function() {
       Plotly.newPlot("figure_time_series", data_to_plot);
   };
 
-  post_rendering_request(polygon_id, rendering_type, date_from, date_to, layer, whenDone);
+  postRenderingRequest(data, whenDone);
 });
 
 </script>
