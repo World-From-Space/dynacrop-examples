@@ -1,7 +1,18 @@
-api_key = "api_key";
-api_url = "https://api-dynacrop.worldfromspace.cz/api/v2/";
-tiles_url = "https://nc70mg4l6d.execute-api.eu-central-1.amazonaws.com/{z}/{x}/{y}.png?nodata=0&resampling_method=nearest&url=";
+var dev_api_url = "http://dev-api-dynacrop.worldfromspace.cz";
+var prod_api_url = "http://api-dynacrop.worldfromspace.cz";
+var api_v2_sufix = "/api/v2/";
+var api_url = prod_api_url + api_v2_sufix;
+var rr_post_wait_time = 1000;
+var rr_fail_after = 60;
+var api_key = null;
 
+function setApiKey(key){
+  api_key = key;
+}
+
+function useDevApi(){
+  api_url = dev_api_url + api_v2_sufix;
+}
 
 function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
   $.ajax({
@@ -10,13 +21,13 @@ function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
       data: { "api_key" : api_key },
       processData: true,
       success: function( data, textStatus, jQxhr ){
-          console.log(JSON.stringify(data));
+          // console.log(JSON.stringify(data));
           if(data['status'] == "completed"){
-              console.log("Request completed");
+              //console.log("Request completed");
               whenDone(data);
           }
           else{
-              waitUntilDone(id, endpoint, whenDone, 1000, fail_after - 1);
+              waitUntilDone(id, endpoint, whenDone, fail_after - 1);
           }
       },
       error: function( jqXhr, textStatus, errorThrown ){
@@ -25,7 +36,7 @@ function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
   });
 }
 
-function waitUntilDone(id, endpoint, whenDone, wait_time, fail_after){
+function waitUntilDone(id, endpoint, whenDone, fail_after=rr_fail_after, wait_time=rr_post_wait_time){
   if(fail_after > 0){
       setTimeout(waitUntilDoneWorker.bind(null, id, endpoint, whenDone, fail_after), wait_time);
   }
@@ -47,7 +58,7 @@ function newPolygon(wtk){
       processData: false,
       success: function( data, textStatus, jQxhr ){
           console.log(JSON.stringify(data));
-          waitUntilDone(data['id'], endpoint, function(response) { console.log("Polygon "+response['id']+" ready! "); }, 0, 60);
+          waitUntilDone(data['id'], endpoint, function(response) { console.log("Polygon "+response['id']+" ready! "); });
       },
       error: function( jqXhr, textStatus, errorThrown ){
           console.log(errorThrown);
@@ -55,6 +66,28 @@ function newPolygon(wtk){
   });
 }
 
+function post_rendering_request(jsonData, whenDone){
+  var endpoint = 'processing_request';
+  jsonData['api_key'] = api_key;
+  $.ajax({
+      url: api_url+endpoint,
+      dataType: 'json',
+      type: 'post',
+      contentType: 'application/json',
+      data: JSON.stringify(jsonData),
+      processData: false,
+      success: function( data, textStatus, jQxhr ){
+          // console.log(JSON.stringify(data));
+          waitUntilDone(data['id'], endpoint, whenDone);
+      },
+      error: function( jqXhr, textStatus, errorThrown ){
+          console.log(errorThrown);
+      }
+  });
+}
+
+
+/*
 function showGeotiff(url, wtk_geometry, map){
   fetch(url)
     .then(response => response.arrayBuffer())
@@ -85,28 +118,5 @@ function addTileLayer(color_tiff_url, wtk_geometry, map){
     lyr.addTo(map);
     map.fitBounds(feature.getBounds());
     console.log(tiles_url+color_tiff_url);
-    // "https://nc70mg4l6d.execute-api.eu-central-1.amazonaws.com/{x}/{y}/{z}.png?url=https://dev-dynacrop-data.s3.amazonaws.com/8fc9ad6b99de7a4714689096893c566cc063f1c984d55ce2af3c8f23d797f790/observation_color.tiff&nodata=0&resampling_method=nearest"
 }
-
-
-function post_rendering_request(polygon_id, rendering_type, date_from, date_to, layer, whenDone){
-  var endpoint = 'processing_request';
-  var jsonData = { "rendering_type": rendering_type, "date_from": date_from, "date_to": date_to, "layer": layer, "polygon_id": polygon_id, "api_key": api_key};
-
-  $.ajax({
-      url: api_url+endpoint,
-      dataType: 'json',
-      type: 'post',
-      contentType: 'application/json',
-      data: JSON.stringify(jsonData),
-      processData: false,
-      success: function( data, textStatus, jQxhr ){
-          console.log(JSON.stringify(data));
-          waitUntilDone(data['id'], endpoint, whenDone, 0, 60);
-      },
-      error: function( jqXhr, textStatus, errorThrown ){
-          console.log(errorThrown);
-      }
-  });
-
-}
+*/
