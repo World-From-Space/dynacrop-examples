@@ -45,30 +45,19 @@ function waitUntilDone(id, endpoint, whenDone, fail_after=rr_fail_after, wait_ti
   }
 }
 
-function newPolygon(wtk){
+function uploadPolyon(wtk, whenDone){
   var endpoint = 'polygons';
   var jsonData = {"geometry" : wtk, "api_key": api_key};
-
-  $.ajax({
-      url: api_url+endpoint,
-      dataType: 'json',
-      type: 'post',
-      contentType: 'application/json',
-      data: JSON.stringify(jsonData),
-      processData: false,
-      success: function( data, textStatus, jQxhr ){
-          console.log(JSON.stringify(data));
-          waitUntilDone(data['id'], endpoint, function(response) { console.log("Polygon "+response['id']+" ready! "); });
-      },
-      error: function( jqXhr, textStatus, errorThrown ){
-          console.log(errorThrown);
-      }
-  });
+  postData(endpoint, jsonData, whenDone);
 }
 
-function post_rendering_request(jsonData, whenDone){
+function postRenderingRequest(jsonData, whenDone){
   var endpoint = 'processing_request';
   jsonData['api_key'] = api_key;
+  postData(endpoint, jsonData, whenDone);
+}
+
+function postData(endpoint, jsonData, whenDone){
   $.ajax({
       url: api_url+endpoint,
       dataType: 'json',
@@ -77,7 +66,6 @@ function post_rendering_request(jsonData, whenDone){
       data: JSON.stringify(jsonData),
       processData: false,
       success: function( data, textStatus, jQxhr ){
-          // console.log(JSON.stringify(data));
           waitUntilDone(data['id'], endpoint, whenDone);
       },
       error: function( jqXhr, textStatus, errorThrown ){

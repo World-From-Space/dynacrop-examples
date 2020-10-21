@@ -25,7 +25,6 @@
   <body>
     <div id="map_picker"></div>
     <script>
-
       function getControlDrawConfig(drawnItems){
         return  {
               position: 'topright',
@@ -53,6 +52,13 @@
       };
 
       $(window).on('load', function() {
+
+      var whenDone = function(resultJson) {
+          alert("Polygon "+resultJson['id']+" ready! ");
+      };
+
+      setApiKey("api_key");
+
       // initalize leaflet map
       var map_picker = L.map('map_picker', { center: [49.093159, 16.720437], zoom: 16 });
 
@@ -76,12 +82,12 @@
           // get WTK
           var wtk = wellknown.stringify(event.layer.toGeoJSON());
           // call API
-          newPolygon(wtk);
+          uploadPolyon(wtk, whenDone);
       });
 
       map_picker.on(L.Draw.Event.EDITED, function (event) {
           var wtk = wellknown.stringify(event.layers.getLayers()[0].toGeoJSON());
-          newPolygon(wtk);
+          uploadPolyon(wtk, whenDone);
       });
 
     });

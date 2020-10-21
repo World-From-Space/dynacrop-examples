@@ -43,18 +43,18 @@
           subdomains:['mt0','mt1','mt2','mt3']
         }).addTo(map);
 
-      var whenDone = function(result) {
+      var whenDone = function(resultJson) {
         // add tile layer
-        var tileLayer = L.tileLayer(result['result']['tiles_color']);
+        var tileLayer = L.tileLayer(resultJson['result']['tiles_color']);
         tileLayer.addTo(map);
 
         // fit map bounds to polygon
-        var polygon_outline = L.geoJson(wellknown.parse(result['polygon']['geometry']));
+        var polygon_outline = L.geoJson(wellknown.parse(resultJson['polygon']['geometry']));
         map.fitBounds(polygon_outline.getBounds());
       };
 
       // send and process rendering_request
-      post_rendering_request(data, whenDone);
+      postRenderingRequest(data, whenDone);
     });
     </script>
   </body>
