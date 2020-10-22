@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="functions.js"></script>
+    <script src="https://cdn.rawgit.com/mapbox/wellknown/master/wellknown.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <style>
+      #map {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      $(window).on('load', function() {
+        // set api_key
+        setApiKey("api_key");
+
+        // initalize leaflet map
+        var map = L.map('map', { center: [49.093159, 16.720437], zoom: 16 });
+
+        // add Google basemap
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+          }).addTo(map);
+
+        // init map control library
+        map.addControl(new L.Control.Draw({}));
+
+
+        var whenDone = function(resultJson) {
+            alert("Polygon "+resultJson['id']+" ready! ");
+        };
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            map.addLayer(event.layer);
+            // get WTK
+            var wtk = wellknown.stringify(event.layer.toGeoJSON());
+            // call API
+            uploadPolyon(wtk, whenDone);
+        });
+
+    });
+    </script>
+  </body>
+</html>

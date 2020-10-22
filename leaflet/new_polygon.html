@@ -13,7 +13,7 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 
     <style>
-      #map_picker {
+      #map {
         bottom: 0;
         left: 0;
         position: absolute;
@@ -23,7 +23,7 @@
     </style>
   </head>
   <body>
-    <div id="map_picker"></div>
+    <div id="map"></div>
     <script>
       function getControlDrawConfig(drawnItems){
         return  {
@@ -52,43 +52,42 @@
       };
 
       $(window).on('load', function() {
+        setApiKey("api_key");
 
-      var whenDone = function(resultJson) {
-          alert("Polygon "+resultJson['id']+" ready! ");
-      };
+        var whenDone = function(resultJson) {
+            alert("Polygon "+resultJson['id']+" ready! ");
+        };
 
-      setApiKey("api_key");
+        // initalize leaflet map
+        var map_picker = L.map('map', { center: [49.093159, 16.720437], zoom: 16 });
 
-      // initalize leaflet map
-      var map_picker = L.map('map_picker', { center: [49.093159, 16.720437], zoom: 16 });
+        // add Google basemap
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+          }).addTo(map_picker);
 
-      // add Google basemap
-      L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-          maxZoom: 20,
-          subdomains:['mt0','mt1','mt2','mt3']
-        }).addTo(map_picker);
+        // Hack to fix adding point when panning with map. See https://github.com/Leaflet/Leaflet.draw/issues/695
+        L.Draw.Polyline.prototype._onTouch = L.Util.falseFn;
 
-      // Hack to fix adding point when panning with map. See https://github.com/Leaflet/Leaflet.draw/issues/695
-      L.Draw.Polyline.prototype._onTouch = L.Util.falseFn;
+        var drawnItems = L.featureGroup().addTo(map_picker);
+        map_picker.addControl(new L.Control.Draw(getControlDrawConfig(drawnItems)));
 
-      var drawnItems = L.featureGroup().addTo(map_picker);
-      map_picker.addControl(new L.Control.Draw(getControlDrawConfig(drawnItems)));
+        map_picker.on(L.Draw.Event.CREATED, function (event) {
+            // clear old polygons
+            drawnItems.clearLayers();
+            // add new one
+            drawnItems.addLayer(event.layer);
+            // get WTK
+            var wtk = wellknown.stringify(event.layer.toGeoJSON());
+            // call API
+            uploadPolyon(wtk, whenDone);
+        });
 
-      map_picker.on(L.Draw.Event.CREATED, function (event) {
-          // clear old polygons
-          drawnItems.clearLayers();
-          // add new one
-          drawnItems.addLayer(event.layer);
-          // get WTK
-          var wtk = wellknown.stringify(event.layer.toGeoJSON());
-          // call API
-          uploadPolyon(wtk, whenDone);
-      });
-
-      map_picker.on(L.Draw.Event.EDITED, function (event) {
-          var wtk = wellknown.stringify(event.layers.getLayers()[0].toGeoJSON());
-          uploadPolyon(wtk, whenDone);
-      });
+        map_picker.on(L.Draw.Event.EDITED, function (event) {
+            var wtk = wellknown.stringify(event.layers.getLayers()[0].toGeoJSON());
+            uploadPolyon(wtk, whenDone);
+        });
 
     });
     </script>

@@ -10,11 +10,11 @@
 
     <style>
       #map {
-        bottom: 0;
         left: 0;
-        position: absolute;
-        right: 0;
         top: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
       }
     </style>
   </head>
@@ -37,6 +37,11 @@
                    "date_from": "2018-05-15",
                    "date_to": "2018-12-17",
                    "layer": "NDVI" }; // e.g NDVI, FAPAR etc. (see https://dynacrop.worldfromspace.cz/docs/#/products)
+
+      // add OSM basemap
+      // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      //    subdomains:['a','b','c']
+      // }).addTo(map);
 
       // add Google basemap
       L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
