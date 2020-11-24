@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="dynacrop.js"></script>
+    <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+    <script src="https://cdn.rawgit.com/mapbox/wellknown/master/wellknown.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <style>
+      #map_picker {
+        width: 80%;
+        height: 450px;
+      }
+      #map{
+        width: 80%;
+        height: 450px;
+        display: none;
+      }
+      #basic_setup_div{
+        width: 100%;
+        height: 20px;
+      }
+      body{
+        margin:5;
+      }
+      #main_content_div{
+        margin:0;
+      }
+      #polygon_div{
+        float:left;
+        width:50%;
+        overflow:hidden;
+      }
+      #rendering_div{
+        float:left;
+        width:50%;
+        overflow:hidden;
+      }
+      #text_api_key_div{
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+      #textarea_new_polygon_result{
+        font-family: monospace;
+        width: 80%;
+      }
+      #textarea_rr_reqest{
+        font-family: monospace;
+        width: 80%;
+      }
+      #textarea_rr_response{
+        font-family: monospace;
+        width: 80%;
+      }
+      #figure_time_series{
+          width:80%;
+          height:450px;
+          text-align: center;
+          display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="basic_setup_div">
+      <b>Setup</b>
+      <input type="radio" id="male" name="api_url" value="prod" onchange="useProdApi()">
+      <label for="prod">Prod</label>
+      <input type="radio" id="dev" name="api_url" value="dev" onchange="useDevApi()" checked>
+      <label for="dev">Dev</label>
+      <span id="text_api_key_div"> api_key: <input type="text" id="text_api_key" value="api_key" onchange="setApiKey(this.value)"> </span>
+      <a href="http://dev-dynacrop.worldfromspace.cz/docs">docs</a>
+    </div>
+
+    <div id="main_content_div">
+      <div id="polygon_div">
+        <h2>Polygon</h2>
+          <div id="map_picker_div">
+              <input type="checkbox" id="checkbox_smi_enabled"> smi_enabled <br/>
+              max_mean_cloud_cover <input type="number" id="input_max_mean_cloud_cover" value="0.1"> <br/>
+              <div id="map_picker"></div>
+              <textarea id="textarea_new_polygon_result" rows="10" cols="50"></textarea>
+          </div>
+        </div>
+      <div id="rendering_div">
+        <h2>Rendering request</h2>
+        <b>rendering_type:</b> observation, filed_zonation, time_series
+        <b>layer:</b> <a href="https://docs.dynacrop.space/docs/#/products">here</a>
+        <textarea id="textarea_rr_reqest" rows="10" cols="50"></textarea>
+        <button type="submit" onClick="submitRR()">Submit</button>
+        <div id="map"></div>
+        <div id="figure_time_series"></div>
+        <textarea id="textarea_rr_response" rows="10" cols="50">Run a rendering request to see results.</textarea>
+      </div>
+      </div>
+
+    <script>
+      function getGoogleBaseMap(){
+        return L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 19,
+            subdomains:['mt0','mt1','mt2','mt3']
+          });
+      }
+
+      function getControlDrawConfig(drawnItems){
+        return  {
+              position: 'topright',
+              draw: {
+                  polygon: {
+                      allowIntersection: false,
+                      showArea: true,
+                      shapeOptions: {
+                          color: '#bada55'
+                      }
+                  },
+                  rectangle: false,
+                  polyline: false,
+                  marker: false,
+                  circlemarker: false,
+                  circle: false
+              }
+          };
+      }
+
+      function mapPicker(){
+        $("#textarea_new_polygon_result").html("Draw a polygon");
+        var whenDoneNewPolygon = function(resultJson) {
+            delete resultJson['valid_observations'];
+            delete resultJson['cloud_cover_percent'];
+            update_rr_request_textarea(resultJson['id']);
+            var str = JSON.stringify(resultJson, undefined, 4);
+            $("#textarea_new_polygon_result").val(str);
+        };
+        var whenErrorNewPolygon = function(error) {
+            var str = JSON.stringify(error, undefined, 4);
+            $("#textarea_new_polygon_result").val(str);
+        };
+
+        // initalize leaflet map
+        var map_picker = L.map('map_picker', { center: [49.093159, 16.720437], zoom: 15 });
+
+        // add Google basemap
+        getGoogleBaseMap().addTo(map_picker);
+
+        var drawnItems = L.featureGroup().addTo(map_picker);
+        map_picker.addControl(new L.Control.Draw(getControlDrawConfig(drawnItems)));
+
+        map_picker.on(L.Draw.Event.CREATED, function (event) {
+            // clear old polygons
+            drawnItems.clearLayers();
+            // add new one
+            drawnItems.addLayer(event.layer);
+            // get WTK
+            var wtk = wellknown.stringify(event.layer.toGeoJSON());
+
+            $("#textarea_new_polygon_result").val("Started processing... \nWait for result");
+            // call API
+            uploadPolyon(wtk, whenDoneNewPolygon, whenErrorNewPolygon, $("checkbox_smi_enabled").checked, parseFloat($("#input_max_mean_cloud_cover").val()));
+        });
+
+      }
+
+      function update_rr_request_textarea(polygon_id){
+        // prepare data
+        var request_data = {
+                     "polygon_id": polygon_id,
+                     "rendering_type": "observation",
+                     "date_from": "2020-01-01",
+                     "date_to": new Date().toISOString().split('T')[0],
+                     "layer": "NDVI" };
+
+        var str = JSON.stringify(request_data, undefined, 4);
+        $("#textarea_rr_reqest").val(str);
+      }
+
+
+      function submitRR(){
+        $("#textarea_rr_response").val("Started processing... \nWait for result");
+        var request_data = JSON.parse($("#textarea_rr_reqest").val());
+        if(request_data['rendering_type'] != "time_series"){
+            $("#map").show();
+            $("#figure_time_series").hide();
+            // $("#figure_time_series").hide();
+            rendering_reqest_map(request_data);
+        }
+        else{
+            $("#map").hide();
+            $("#figure_time_series").show();
+            rendering_time_series(request_data);
+        }
+      }
+
+      function whenErrorRR(error) {
+          var str = JSON.stringify(error, undefined, 4);
+          $("#textarea_rr_response").val(str);
+      };
+
+
+      function rendering_time_series(request_data){
+        var whenDone = function(data) {
+          var data_to_plot = [
+            {
+              x: data['result']['time_series']['dates'],
+              y: data['result']['time_series']['values'],
+              type: 'scatter'
+            }
+            ];
+            Plotly.newPlot("figure_time_series", data_to_plot);
+
+            delete data['polygon'];
+            var str = JSON.stringify(data, undefined, 4);
+            $("#textarea_rr_response").val(str);
+        };
+        postRenderingRequest(request_data, whenDone, whenErrorRR);
+      }
+
+      function rendering_reqest_map(request_data){
+        $("#textarea_rr_response").val("Started processing... \nWait for result");
+
+        var whenDone = function(resultJson) {
+          if(map.dyna_layer != null){
+              map.removeLayer(map.dyna_layer);
+          }
+          // add tile layer
+          var tileLayer = L.tileLayer(resultJson['result']['tiles_color']);
+          tileLayer.addTo(map);
+          map.dyna_layer = tileLayer;
+
+          // fit map bounds to polygon
+          var polygon_outline = L.geoJson(wellknown.parse(resultJson['polygon']['geometry']));
+          map.fitBounds(polygon_outline.getBounds());
+
+          delete resultJson['polygon'];
+          var str = JSON.stringify(resultJson, undefined, 4);
+          $("#textarea_rr_response").val(str);
+        };
+
+        postRenderingRequest(request_data, whenDone, whenErrorRR);
+      }
+
+      function mapShowPolygon(){
+        // initalize leaflet map
+        var map = L.map('map', {
+            minZoom: 0,
+            maxZoom: 17
+        });
+
+        // add Google basemap
+        getGoogleBaseMap().addTo(map);
+
+        return map;
+      }
+
+      $(window).on('load', function() {
+        setApiKey("api_key");
+        useDevApi();
+        update_rr_request_textarea(1);
+        mapPicker();
+        map = mapShowPolygon();
+    });
+    </script>
+  </body>
+</html>

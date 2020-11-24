@@ -14,6 +14,10 @@ function useDevApi(){
   api_url = dev_api_url + api_v2_sufix;
 }
 
+function useProdApi(){
+  api_url = prod_api_url + api_v2_sufix;
+}
+
 function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
   $.ajax({
       url: api_url+endpoint+"/"+id,
@@ -45,19 +49,29 @@ function waitUntilDone(id, endpoint, whenDone, fail_after=rr_fail_after, wait_ti
   }
 }
 
-function uploadPolyon(wtk, whenDone){
-  var endpoint = 'polygons';
-  var jsonData = {"geometry" : wtk, "api_key": api_key};
-  postData(endpoint, jsonData, whenDone);
+function defaultWhenError(error){
+    console.log(error);
 }
 
-function postRenderingRequest(jsonData, whenDone){
+function uploadPolyon(wtk, whenDone, whenError = null, smi_enabled = false, max_mean_cloud_cover = 0.1){
+  if(whenError == null){
+    whenError = defaultWhenError;
+  }
+  var endpoint = 'polygons';
+  var jsonData = {"geometry" : wtk, "api_key": api_key, "smi_enabled": smi_enabled, "max_mean_cloud_cover": max_mean_cloud_cover};
+  postData(endpoint, jsonData, whenDone, whenError);
+}
+
+function postRenderingRequest(jsonData, whenDone, whenError = null){
+  if(whenError == null){
+    whenError = defaultWhenError;
+  }
   var endpoint = 'processing_request';
   jsonData['api_key'] = api_key;
-  postData(endpoint, jsonData, whenDone);
+  postData(endpoint, jsonData, whenDone, whenError);
 }
 
-function postData(endpoint, jsonData, whenDone){
+function postData(endpoint, jsonData, whenDone, whenError){
   $.ajax({
       url: api_url+endpoint,
       dataType: 'json',
@@ -69,7 +83,7 @@ function postData(endpoint, jsonData, whenDone){
           waitUntilDone(data['id'], endpoint, whenDone);
       },
       error: function( jqXhr, textStatus, errorThrown ){
-          console.log(errorThrown);
+          whenError({"status": jqXhr.status, "response": jqXhr.responseText });
       }
   });
 }
