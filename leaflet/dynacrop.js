@@ -1,5 +1,5 @@
-var dev_api_url = "http://dev-api-dynacrop.worldfromspace.cz";
-var prod_api_url = "http://api-dynacrop.worldfromspace.cz";
+var dev_api_url = "https://dev-api-dynacrop.worldfromspace.cz";
+var prod_api_url = "https://api-dynacrop.worldfromspace.cz";
 var api_v2_sufix = "/api/v2/";
 var api_url = prod_api_url + api_v2_sufix;
 var rr_post_wait_time = 1000;
