@@ -71,6 +71,15 @@ function postRenderingRequest(jsonData, whenDone, whenError = null){
   postData(endpoint, jsonData, whenDone, whenError);
 }
 
+function postPolygon(jsonData, whenDone, whenError = null){
+  if(whenError == null){
+    whenError = defaultWhenError;
+  }
+  var endpoint = 'polygons';
+  jsonData['api_key'] = api_key;
+  postData(endpoint, jsonData, whenDone, whenError);
+}
+
 function postData(endpoint, jsonData, whenDone, whenError){
   $.ajax({
       url: api_url+endpoint,

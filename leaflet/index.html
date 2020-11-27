@@ -52,6 +52,10 @@
         font-family: monospace;
         width: 80%;
       }
+      #textarea_new_polygon_reqest{
+        font-family: monospace;
+        width: 80%;
+      }
       #textarea_rr_reqest{
         font-family: monospace;
         width: 80%;
@@ -65,6 +69,9 @@
           height:450px;
           text-align: center;
           display: none;
+      }
+      .download_button{
+        display: none;
       }
     </style>
   </head>
@@ -83,8 +90,8 @@
       <div id="polygon_div">
         <h2>Polygon</h2>
           <div id="map_picker_div">
-              <input type="checkbox" id="checkbox_smi_enabled"> smi_enabled <br/>
-              max_mean_cloud_cover <input type="number" id="input_max_mean_cloud_cover" value="0.1"> <br/>
+              <textarea id="textarea_new_polygon_reqest" rows="10" cols="50"></textarea>
+              <button type="submit" onClick="submitPR()">Submit</button>
               <div id="map_picker"></div>
               <textarea id="textarea_new_polygon_result" rows="10" cols="50"></textarea>
           </div>
@@ -98,6 +105,10 @@
         <div id="map"></div>
         <div id="figure_time_series"></div>
         <textarea id="textarea_rr_response" rows="10" cols="50">Run a rendering request to see results.</textarea>
+        <br/>
+        <button id="download_raw_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">raw tiff</button>
+        <button id="download_color_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">color tiff</button>
+        <button id="download_png" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">png</button>
       </div>
       </div>
 
@@ -131,17 +142,6 @@
 
       function mapPicker(){
         $("#textarea_new_polygon_result").html("Draw a polygon");
-        var whenDoneNewPolygon = function(resultJson) {
-            delete resultJson['valid_observations'];
-            delete resultJson['cloud_cover_percent'];
-            update_rr_request_textarea(resultJson['id']);
-            var str = JSON.stringify(resultJson, undefined, 4);
-            $("#textarea_new_polygon_result").val(str);
-        };
-        var whenErrorNewPolygon = function(error) {
-            var str = JSON.stringify(error, undefined, 4);
-            $("#textarea_new_polygon_result").val(str);
-        };
 
         // initalize leaflet map
         var map_picker = L.map('map_picker', { center: [49.093159, 16.720437], zoom: 15 });
@@ -159,10 +159,8 @@
             drawnItems.addLayer(event.layer);
             // get WTK
             var wtk = wellknown.stringify(event.layer.toGeoJSON());
-
-            $("#textarea_new_polygon_result").val("Started processing... \nWait for result");
-            // call API
-            uploadPolyon(wtk, whenDoneNewPolygon, whenErrorNewPolygon, $("checkbox_smi_enabled").checked, parseFloat($("#input_max_mean_cloud_cover").val()));
+            $("#textarea_new_polygon_result").val("Submit request to see results.");
+            update_pr_request_textarea(wtk);
         });
 
       }
@@ -180,6 +178,13 @@
         $("#textarea_rr_reqest").val(str);
       }
 
+      function update_pr_request_textarea(wtk){
+        // prepare data
+        var request_data = {"geometry" : wtk, "smi_enabled": false, "max_mean_cloud_cover": 0.3};
+        var str = JSON.stringify(request_data, undefined, 4);
+        $("#textarea_new_polygon_reqest").val(str);
+      }
+
 
       function submitRR(){
         $("#textarea_rr_response").val("Started processing... \nWait for result");
@@ -195,6 +200,26 @@
             $("#figure_time_series").show();
             rendering_time_series(request_data);
         }
+      }
+
+
+      function submitPR(){
+        var whenDoneNewPolygon = function(resultJson) {
+            delete resultJson['valid_observations'];
+            delete resultJson['cloud_cover_percent'];
+            delete resultJson['geometry'];
+            update_rr_request_textarea(resultJson['id']);
+            var str = JSON.stringify(resultJson, undefined, 4);
+            $("#textarea_new_polygon_result").val(str);
+        };
+        var whenErrorNewPolygon = function(error) {
+            var str = JSON.stringify(error, undefined, 4);
+            $("#textarea_new_polygon_result").val(str);
+        };
+
+        $("#textarea_new_polygon_result").val("Started processing... \nWait for result");
+        var request_data = JSON.parse($("#textarea_new_polygon_reqest").val());
+        postPolygon(request_data, whenDoneNewPolygon, whenErrorNewPolygon);
       }
 
       function whenErrorRR(error) {
@@ -240,6 +265,12 @@
           delete resultJson['polygon'];
           var str = JSON.stringify(resultJson, undefined, 4);
           $("#textarea_rr_response").val(str);
+
+
+          $(".download_button").show();
+          $("#download_raw_tiff").attr('href', resultJson['result']['raw']);
+          $("#download_color_tiff").attr('href', resultJson['result']['color']);
+          $("#download_png").attr('href', resultJson['result']['png']);
         };
 
         postRenderingRequest(request_data, whenDone, whenErrorRR);
@@ -262,6 +293,8 @@
         setApiKey("api_key");
         useDevApi();
         update_rr_request_textarea(1);
+        var default_polygon_wtk = "POLYGON((16.609153599499933 49.20045317863389,16.61297306513714 49.199219336662225,16.61524757838177 49.19759286157719,16.616577954053156 49.195910244858794,16.61400303339886 49.195265226606885,16.6094540069096 49.197368515988586,16.608381123303644 49.19863044668781,16.609153599499933 49.20045317863389))";
+        update_pr_request_textarea(default_polygon_wtk);
         mapPicker();
         map = mapShowPolygon();
     });
