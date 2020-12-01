@@ -1,9 +1,10 @@
 var dev_api_url = "https://dev-api-dynacrop.worldfromspace.cz";
 var prod_api_url = "https://api-dynacrop.worldfromspace.cz";
+var local_api_url = "http://127.0.0.1:5000";
 var api_v2_sufix = "/api/v2/";
 var api_url = prod_api_url + api_v2_sufix;
 var rr_post_wait_time = 1000;
-var rr_fail_after = 60;
+var rr_fail_after = 120;
 var api_key = null;
 
 function setApiKey(key){
@@ -18,7 +19,12 @@ function useProdApi(){
   api_url = prod_api_url + api_v2_sufix;
 }
 
-function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
+function useLocalApi(){
+  api_url = local_api_url + api_v2_sufix;
+}
+
+
+function waitUntilDoneWorker(id, endpoint, whenDone, whenError, fail_after){
   $.ajax({
       url: api_url+endpoint+"/"+id,
       type: 'get',
@@ -31,21 +37,21 @@ function waitUntilDoneWorker(id, endpoint, whenDone, fail_after){
               whenDone(data);
           }
           else{
-              waitUntilDone(id, endpoint, whenDone, fail_after - 1);
+              waitUntilDone(id, endpoint, whenDone, whenError, fail_after - 1);
           }
       },
       error: function( jqXhr, textStatus, errorThrown ){
-          console.log(errorThrown);
+          whenError({"status": jqXhr.status, "response": jqXhr.responseText });
       }
   });
 }
 
-function waitUntilDone(id, endpoint, whenDone, fail_after=rr_fail_after, wait_time=rr_post_wait_time){
+function waitUntilDone(id, endpoint, whenDone, whenError, fail_after=rr_fail_after, wait_time=rr_post_wait_time){
   if(fail_after > 0){
-      setTimeout(waitUntilDoneWorker.bind(null, id, endpoint, whenDone, fail_after), wait_time);
+      setTimeout(waitUntilDoneWorker.bind(null, id, endpoint, whenDone, whenError, fail_after), wait_time);
   }
   else{
-      console.log("Reuqest not completed");
+      whenError({"status": "error", "response": "not completed in "+(rr_fail_after*rr_post_wait_time)/1000+" seconds."});
   }
 }
 
@@ -89,7 +95,7 @@ function postData(endpoint, jsonData, whenDone, whenError){
       data: JSON.stringify(jsonData),
       processData: false,
       success: function( data, textStatus, jQxhr ){
-          waitUntilDone(data['id'], endpoint, whenDone);
+          waitUntilDone(data['id'], endpoint, whenDone, whenError);
       },
       error: function( jqXhr, textStatus, errorThrown ){
           whenError({"status": jqXhr.status, "response": jqXhr.responseText });
