@@ -4,7 +4,7 @@ var local_api_url = "http://127.0.0.1:5000";
 var api_v2_sufix = "/api/v2/";
 var api_url = prod_api_url + api_v2_sufix;
 var rr_post_wait_time = 1000;
-var rr_fail_after = 120;
+var rr_fail_after = 3600;
 var api_key = null;
 
 function setApiKey(key){
