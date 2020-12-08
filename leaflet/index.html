@@ -48,6 +48,10 @@
         margin-left: 10px;
         margin-right: 10px;
       }
+      #text_wait_time_div{
+        margin-left: 0px;
+        margin-right: 10px;
+      }
       #textarea_new_polygon_result{
         font-family: monospace;
         width: 80%;
@@ -85,6 +89,7 @@
       <input type="radio" id="local" name="api_url" value="local" onchange="useLocalApi()">
       <label for="local">Local</label>
       <span id="text_api_key_div"> api_key: <input type="text" id="text_api_key" value="api_key" onchange="setApiKey(this.value)"> </span>
+      <span id="text_wait_time_div"> wait: <input type="text" id="wait_time" value="3600" onchange="setTimeoutUntilFail(this.value)"> s </span> 
       <a href="http://dev-dynacrop.worldfromspace.cz/docs">docs</a>
     </div>
 

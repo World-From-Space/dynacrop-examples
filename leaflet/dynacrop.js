@@ -7,6 +7,10 @@ var rr_post_wait_time = 1000;
 var rr_fail_after = 3600;
 var api_key = null;
 
+function setTimeoutUntilFail(fail_after_timeout){
+    rr_fail_after = parseInt(fail_after_timeout);
+}
+
 function setApiKey(key){
   api_key = key;
 }
@@ -35,6 +39,9 @@ function waitUntilDoneWorker(id, endpoint, whenDone, whenError, fail_after){
           if(data['status'] == "completed"){
               //console.log("Request completed");
               whenDone(data);
+          }
+          else if(data['status'] == "error"){
+              whenError({ "status": "error", "response": jqXhr.responseText });
           }
           else{
               waitUntilDone(id, endpoint, whenDone, whenError, fail_after - 1);
