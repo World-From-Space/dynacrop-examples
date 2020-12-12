@@ -89,7 +89,7 @@
       <input type="radio" id="local" name="api_url" value="local" onchange="useLocalApi()">
       <label for="local">Local</label>
       <span id="text_api_key_div"> api_key: <input type="text" id="text_api_key" value="api_key" onchange="setApiKey(this.value)"> </span>
-      <span id="text_wait_time_div"> wait: <input type="text" id="wait_time" value="3600" onchange="setTimeoutUntilFail(this.value)"> s </span> 
+      <span id="text_wait_time_div"> wait: <input type="text" id="wait_time" value="3600" onchange="setTimeoutUntilFail(this.value)"> s </span>
       <a href="http://dev-dynacrop.worldfromspace.cz/docs">docs</a>
     </div>
 
@@ -113,6 +113,7 @@
         <div id="figure_time_series"></div>
         <textarea id="textarea_rr_response" rows="10" cols="50">Run a rendering request to see results.</textarea>
         <br/>
+        <button id="preview_button" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">preview</button>
         <button id="download_raw_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">raw tiff</button>
         <button id="download_color_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">color tiff</button>
         <button id="download_png" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">png</button>
@@ -275,6 +276,7 @@
 
 
           $(".download_button").show();
+          $("#preview_button").attr('href', resultJson['result']['tiles_demo']);
           $("#download_raw_tiff").attr('href', resultJson['result']['raw']);
           $("#download_color_tiff").attr('href', resultJson['result']['color']);
           $("#download_png").attr('href', resultJson['result']['png']);
