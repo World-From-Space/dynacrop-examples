@@ -41,7 +41,7 @@ function waitUntilDoneWorker(id, endpoint, whenDone, whenError, fail_after){
               whenDone(data);
           }
           else if(data['status'] == "error"){
-              whenError({ "status": "error", "response": jqXhr.responseText });
+              whenError(data);
           }
           else{
               waitUntilDone(id, endpoint, whenDone, whenError, fail_after - 1);
