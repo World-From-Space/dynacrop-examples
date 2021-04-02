@@ -1,5 +1,5 @@
 var dev_api_url = "https://dev-api-dynacrop.worldfromspace.cz";
-var django_dev_api_url = "https://dev-api-dynacrop.worldfromspace.cz:8080";
+var old_prod_api_url = "https://old-api-dynacrop-django.worldfromspace.cz";
 var prod_api_url = "https://api-dynacrop.worldfromspace.cz";
 var local_api_url = "http://127.0.0.1:5000";
 var api_v2_sufix = "/api/v2/";
@@ -20,8 +20,8 @@ function useDevApi(){
   api_url = dev_api_url + api_v2_sufix;
 }
 
-function useDjangoDevApi(){
-  api_url = django_dev_api_url + api_v2_sufix;
+function useOldProdApi(){
+  api_url = old_prod_api_url + api_v2_sufix;
 }
 
 function useProdApi(){
