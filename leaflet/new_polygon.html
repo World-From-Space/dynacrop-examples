@@ -81,12 +81,12 @@
             // get WTK
             var wtk = wellknown.stringify(event.layer.toGeoJSON());
             // call API
-            uploadPolyon(wtk, whenDone);
+            uploadPolygon(wtk, whenDone);
         });
 
         map_picker.on(L.Draw.Event.EDITED, function (event) {
             var wtk = wellknown.stringify(event.layers.getLayers()[0].toGeoJSON());
-            uploadPolyon(wtk, whenDone);
+            uploadPolygon(wtk, whenDone);
         });
 
     });
