@@ -71,7 +71,7 @@ function defaultWhenError(error){
     console.log(error);
 }
 
-function uploadPolyon(wtk, whenDone, whenError = null, smi_enabled = false, max_mean_cloud_cover = 0.1){
+function uploadPolygon(wtk, whenDone, whenError = null, smi_enabled = false, max_mean_cloud_cover = 0.1){
   if(whenError == null){
     whenError = defaultWhenError;
   }
