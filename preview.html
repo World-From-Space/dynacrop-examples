@@ -42,15 +42,7 @@
 
       let searchParams = new URLSearchParams(window.location.search);
       if(searchParams.has('url')){
-        var final_tile_url = tiles_url+searchParams.get("url");
-        if(searchParams.get('url').includes("raw_int")){
-              if (searchParams.has('color_map')) {
-                  final_tile_url += "&color_map="+searchParams.get('color_map');
-              }
-              else{
-                  final_tile_url += "&color_map=autumn";
-              }
-        }
+        var final_tile_url = tiles_url+encodeURIComponent(searchParams.get("url"));
         var lyr = L.tileLayer(final_tile_url, {tms: false, opacity: 1.0, attribution: ""});
         lyr.addTo(map);
       }
@@ -58,7 +50,7 @@
         alert("No URL provided!");
       }
 
-      $.getJSON(`${server_url}/bounds?url=${searchParams.get('url')}`, function(json){
+      $.getJSON(`${server_url}/bounds?url=${encodeURIComponent(searchParams.get('url'))}`, function(json){
             console.log(json);
             var bounds = [[json['bounds'][1], json['bounds'][0]],[json['bounds'][3], json['bounds'][2]]];
             map.fitBounds(bounds);
