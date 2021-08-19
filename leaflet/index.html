@@ -77,6 +77,9 @@
       .download_button{
         display: none;
       }
+      #palette_div{
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -88,8 +91,6 @@
       <label for="dev">Dev</label>
       <input type="radio" id="local" name="api_url" value="local" onchange="useLocalApi()">
       <label for="local">Local</label>
-      <input type="radio" id="django-dev" name="api_url" value="old-prod" onchange="useOldProdApi()">
-      <label for="old-prod">ProdOld</label>
       <span id="text_api_key_div"> api_key: <input type="text" id="text_api_key" value="api_key" onchange="setApiKey(this.value)"> </span>
       <span id="text_wait_time_div"> wait: <input type="text" id="wait_time" value="3600" onchange="setTimeoutUntilFail(this.value)"> s </span>
       <a href="http://dev-dynacrop.worldfromspace.cz/docs">docs</a>
@@ -115,10 +116,22 @@
         <div id="figure_time_series"></div>
         <textarea id="textarea_rr_response" rows="10" cols="50">Run a rendering request to see results.</textarea>
         <br/>
+          <div id="palette_div">
+          <b> Color Palette </b> <br/>
+          min <input type="number" id="palette_min" value="-1">
+          max <input type="number" id="palette_max" value="1"> <br/>
+          name <input type="text" id="palette_name" value="fire_palette">
+          steps <input type="number" id="palette_steps" value="10">  <br/>
+          <button type="submit" onClick="changeColorPalette()">Apply color palette</button>
+          </div>
+
+        <br/>
+        <b class="download_button"> Download </b> <br/>
         <button id="preview_button" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">preview</button>
         <button id="download_raw_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">raw tiff</button>
         <button id="download_color_tiff" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">color tiff</button>
         <button id="download_png" class="download_button" type="submit" onclick="window.location.href = $(this).attr('href');">png</button>
+        <br/><br/><br/>
       </div>
       </div>
 
@@ -267,6 +280,7 @@
           var tileLayer = L.tileLayer(resultJson['result']['tiles_color']);
           tileLayer.addTo(map);
           map.dyna_layer = tileLayer;
+          map.tiff_color_url = resultJson['result']['color'];
 
           // fit map bounds to polygon
           var polygon_outline = L.geoJson(wellknown.parse(resultJson['polygon']['geometry']));
@@ -276,6 +290,7 @@
           var str = JSON.stringify(resultJson, undefined, 4);
           $("#textarea_rr_response").val(str);
 
+          $("#palette_div").show();
 
           $(".download_button").show();
           $("#preview_button").attr('href', resultJson['result']['tiles_demo']);
@@ -285,6 +300,32 @@
         };
 
         postRenderingRequest(request_data, whenDone, whenErrorRR);
+      }
+
+      function changeColorPalette(){
+        var min = $("#palette_min").val();
+        var max = $("#palette_max").val();
+        var name = $("#palette_name").val();
+        var steps = $("#palette_steps").val();
+
+        if(map.tiff_color_url != null){
+          if(map.dyna_layer != null){
+              map.removeLayer(map.dyna_layer);
+          }
+
+          var tile_server_url = "https://tiler.worldfromspace.cz/{z}/{x}/{y}.png?nodata=0&resampling_method=nearest&url="
+          var tiff_color = map.tiff_color_url.split('?')[0];
+          tiff_color += "?min_value="+min+"&max_value="+max+"&style="+name+"&num_values="+steps;
+          console.log(tiff_color);
+          tile_server_url += encodeURIComponent(tiff_color);
+
+          var tileLayer = L.tileLayer(tile_server_url);
+          tileLayer.addTo(map);
+          map.dyna_layer = tileLayer;
+        }
+
+
+
       }
 
       function mapShowPolygon(){
