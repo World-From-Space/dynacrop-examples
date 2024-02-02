@@ -1,5 +1,5 @@
-var dev_api_url = "https://dev-api-dynacrop.worldfromspace.cz";
-var prod_api_url = "https://api-dynacrop.worldfromspace.cz";
+var dev_api_url = "https://api-dev.dynacrop.space";
+var prod_api_url = "https://api.dynacrop.space";
 var local_api_url = "http://127.0.0.1:5000";
 var api_v2_sufix = "/api/v2/";
 var api_url = prod_api_url + api_v2_sufix;
