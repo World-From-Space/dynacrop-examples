@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIFF Example</title>
+      
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://unpkg.com/georaster"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+
+    <style>
+        #map {
+            position: absolute;
+            inset: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([49.07097698258071, 15.727795704303267], 16);
+
+        // Add OpenStreetMap tile layer
+       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        //Add TIFF layer
+        const tiffImageUrl = "https://api-dev.dynacrop.space/api/file/color/c7c23488-835e-540c-bdcf-ca2963dd071f.tiff?style=zonation&min_value=1&max_value=6&num_values=5";
+        fetch(tiffImageUrl)
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => {
+            parseGeoraster(arrayBuffer).then(georaster => {
+            console.log("georaster:", georaster);
+            const layer = new GeoRasterLayer({
+                georaster: georaster,
+                pixelValuesToColorFn: values => `rgba(${values[0]}, ${values[1]}, ${values[2]}, ${values[3]})`,
+                resolution: 256,
+            }).addTo(map);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TileLayer Example</title>
+      
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            position: absolute;
+            inset: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([49.07097698258071, 15.727795704303267], 16);
+
+        // Add OpenStreetMap tile layer
+       const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // add Czech orthophoto WMS as basemap
+        const wmsLayer = L.tileLayer.wms('https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer', {
+            layers:'0',
+            attribution: '© Czech Office for Surveying, Mapping and Cadastre'
+        }).addTo(map);
+
+        // Add Dynacrop tile layer
+        const dynacropLayer = L.tileLayer('https://tiler.worldfromspace.cz/{z}/{x}/{y}.png?url=https%3A%2F%2Fapi-dev.dynacrop.space%2Fapi%2Ffile%2Fcolor%2F495c6ab8-fd7e-5b17-9cb2-a646e99cd515.tiff%3Fstyle%3Dzonation%26min_value%3D1%26max_value%3D6%26num_values%3D5&nodata=0&resampling_method=nearest', {
+            maxZoom: 19,
+            attribution: '© Dynacrop'
+        });
+
+// Add layer control
+        const baseLayers = {
+            "OpenStreetMap": osm,
+            "Czech orthophoto WMS": wmsLayer,
+        };
+
+        const overlays = {
+            "Dynacrop": dynacropLayer
+        };
+
+        L.control.layers(baseLayers, overlays).addTo(map);
+        dynacropLayer.addTo(map);
+    </script>
