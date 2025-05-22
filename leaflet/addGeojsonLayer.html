@@ -31,13 +31,13 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // add Czech orthophoto WMS as basemap
+        // Add Czech orthophoto WMS as basemap
         const wmsLayer = L.tileLayer.wms('https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer', {
             layers:'0',
             attribution: '© Czech Office for Surveying, Mapping and Cadastre'
         }).addTo(map);
 
-        //Add GEOJSON layer
+        //Create GEOJSON layer and add to the map
         const geojsonUrl = 'https://api-dev.dynacrop.space/api/file/geojson/f03a6ddf-3b5c-5027-ab52-7f7f0cc7c60a.geojson';
         fetch(geojsonUrl)
             .then(response => response.json())
@@ -51,7 +51,7 @@
                 }).addTo(map);
             });
 
-// Add layer control
+        // Add layer control
         const baseLayers = {
             "OpenStreetMap": osm,
             "Czech orthophoto WMS": wmsLayer,
