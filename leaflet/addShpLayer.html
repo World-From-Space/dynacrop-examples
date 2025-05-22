@@ -33,13 +33,13 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // add Czech orthophoto WMS as basemap
+        // Add Czech orthophoto WMS as basemap
         const wmsLayer = L.tileLayer.wms('https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer', {
             layers:'0',
             attribution: '© Czech Office for Surveying, Mapping and Cadastre'
         }).addTo(map);
 
-        //Add SHP layer
+        //Create SHP layer and add to the map
         const shpfileUrl = 'https://api-dev.dynacrop.space/api/file/shp/3f8a2ffd-2140-595e-86fc-5bc4408e73c0.zip';
         shp(shpfileUrl).then(function (geojson) {
         const shpLayer = L.geoJSON(geojson).addTo(map);

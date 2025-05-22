@@ -31,19 +31,19 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // add Czech orthophoto WMS as basemap
+        // Add Czech orthophoto WMS as basemap
         const wmsLayer = L.tileLayer.wms('https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer', {
             layers:'0',
             attribution: '© Czech Office for Surveying, Mapping and Cadastre'
         }).addTo(map);
 
-        // Add Dynacrop tile layer
+        // Create Dynacrop tile layer
         const dynacropLayer = L.tileLayer('https://tiler.worldfromspace.cz/{z}/{x}/{y}.png?url=https%3A%2F%2Fapi-dev.dynacrop.space%2Fapi%2Ffile%2Fcolor%2F495c6ab8-fd7e-5b17-9cb2-a646e99cd515.tiff%3Fstyle%3Dzonation%26min_value%3D1%26max_value%3D6%26num_values%3D5&nodata=0&resampling_method=nearest', {
             maxZoom: 19,
             attribution: '© Dynacrop'
         });
 
-// Add layer control
+        // Add layer control
         const baseLayers = {
             "OpenStreetMap": osm,
             "Czech orthophoto WMS": wmsLayer,
@@ -54,5 +54,7 @@
         };
 
         L.control.layers(baseLayers, overlays).addTo(map);
+        
+        // Add Dynacrop layer to the map
         dynacropLayer.addTo(map);
     </script>
