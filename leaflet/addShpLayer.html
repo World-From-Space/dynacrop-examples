@@ -85,11 +85,11 @@
             div.style.fontSize = '14px';
 
             for (let i = 0; i < dnValues.length; i++) {
-            div.innerHTML +=
-                `<div style="margin-bottom:4px;">
-                '<i style="background:' + getColor(dnValues[i])};width:18px;height:18px;display:inline-block;margin-right:8px;border-radius:3px;vertical-align:middle;"></i>
-                <span>${labels[i]}</span>
-                </div>`;
+                div.innerHTML +=
+                    `<div style="margin-bottom:4px;">
+                        <i style="background:${getColor(dnValues[i])};width:18px;height:18px;display:inline-block;margin-right:8px;border-radius:3px;vertical-align:middle;"></i>
+                        <span>${labels[i]}</span>
+                    </div>`;
             }
             return div;
         };
