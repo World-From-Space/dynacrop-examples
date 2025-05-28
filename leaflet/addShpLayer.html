@@ -15,7 +15,7 @@
     <style>
         #map {
             position: absolute;
-            inset: 0;
+            inset: 0
         }
     </style>
 </head>
@@ -39,11 +39,63 @@
             attribution: '© Czech Office for Surveying, Mapping and Cadastre'
         }).addTo(map);
 
+        // Define fixed color mapping for DN values, you can adjust these colors and classes as needed
+        // Function to get color based on DN value
+        function getColor(dn) {
+            switch (dn) {
+                case 1: return '#d7191c'; 
+                case 2: return '#ffffc0'; 
+                case 3: return '#1a9641'; 
+                default: return '#000000'; // fallback for undefined or other
+            }
+        }
+
+        // Style function for each feature
+        function style(feature) {
+        return {
+            fillColor: getColor(feature.properties.DN),
+            weight: 0.1,
+            opacity: 0.1,
+            fillOpacity: 0.8
+        };
+        }
+
         //Create SHP layer and add to the map
         const shpfileUrl = 'https://api-dev.dynacrop.space/api/file/shp/3f8a2ffd-2140-595e-86fc-5bc4408e73c0.zip';
         shp(shpfileUrl).then(function (geojson) {
-        const shpLayer = L.geoJSON(geojson).addTo(map);
+            const shpLayer = L.geoJSON(geojson, {style: style}).addTo(map);
         });
+
+        // Create and add legend
+        const legend = L.control({ position: 'bottomright' });
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const dnValues = [1, 2, 3];
+            const labels = [
+            '1',
+            '2',
+            '3'
+            ];
+
+            div.style.background = 'rgba(0,0,0,0.8)';
+            div.style.color = 'white';
+            div.style.padding = '8px 12px';
+            div.style.borderRadius = '6px';
+            div.style.fontSize = '14px';
+
+            for (let i = 0; i < dnValues.length; i++) {
+            div.innerHTML +=
+                `<div style="margin-bottom:4px;">
+                '<i style="background:' + getColor(dnValues[i])};width:18px;height:18px;display:inline-block;margin-right:8px;border-radius:3px;vertical-align:middle;"></i>
+                <span>${labels[i]}</span>
+                </div>`;
+            }
+            return div;
+        };
+
+        legend.addTo(map);
+
 
         // Add layer control
         const baseLayers = {

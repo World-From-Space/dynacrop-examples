@@ -22,7 +22,13 @@
             position: absolute;
             inset: 0;
         }
+        /* This is needed to ensure the the layer is not blurred. Some browsers do not support pixelated, so use crisp-edges */
+        .leaflet-image-layer {
+            image-rendering: pixelated;
+            /* image-rendering: crisp-edges; */ /* uncomment if the layer is blurred */
+        }
     </style>
+
 </head>
 
 <body>
