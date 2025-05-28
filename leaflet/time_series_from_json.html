@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Series Median Plot</title>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        #plot { 
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 style="text-align: center;">Time Series Plot</h2>
+    <div id="plot"></div>
+    <script>
+        fetch('data/timeseries.json') // insert your path to the json file
+        .then(response => response.json())
+        .then(data => {
+            const ts = data.result.time_series;
+            const dates = Object.keys(ts).sort();
+            const medians = dates.map(date => ts[date].median);
+
+            const trace = {
+                x: dates,
+                y: medians,
+                mode: 'lines+markers',
+                type: 'scatter',
+                marker: { size: 8 },
+                line: { color: '#1f77b4' },
+                hovertemplate: 'Date: %{x}<br>Median: %{y:.4f}<extra></extra>'
+            };
+
+            const layout = {
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Median Value' },
+                hovermode: 'closest',
+                margin: { t: 40 }
+            };
+
+            Plotly.newPlot('plot', [trace], layout, {
+                responsive: true,
+                modeBarButtonsToRemove: ['select2d', 'lasso2d']
+            });
+
+        })
+    </script>
+</body>
+</html>

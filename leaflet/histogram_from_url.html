@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Histogram</title>
+  <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+
+  <style>
+    body { 
+        font-family: Arial, sans-serif; 
+        margin: 40px; 
+    }
+    #histogram {
+        width: 100%;
+        height: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2 style="text-align: center;">Zonation Histogram </h2>
+  <div id="histogram"></div>
+
+  <script>
+    // Replace this URL with your actual JSON URL
+    const dataUrl = 'https://api-dev.dynacrop.space/api/v2/frequencies/92269d7d-61b4-5aa9-aba0-793b24e6a7a1?type=observation&bins=10';
+    // Fetch data and display histogram with percentages
+    fetch(dataUrl)
+        .then(response => response.json())
+        .then(json => {
+            const binLabels = [];
+            const frequencies = [];
+            let total = 0;
+
+            // Calculate total number of pixels
+            Object.entries(json).forEach(([range, freq]) => {
+                total += freq;
+            });
+
+            Object.entries(json).forEach(([range, freq]) => {
+                // Extract numbers from the range string and round to 2 decimals
+                const match = range.match(/\(([^,]+), ([^)]+)\)/);
+                if (match) {
+                    const start = parseFloat(match[1]).toFixed(2);
+                    const end = parseFloat(match[2]).toFixed(2);
+                    binLabels.push(`(${start}, ${end})`);
+                } else {
+                    binLabels.push(range);
+                }
+                // Calculate percentage
+                const percent = ((freq / total) * 100).toFixed(2);
+                frequencies.push(percent);
+            });
+
+            const trace = {
+                x: binLabels,
+                y: frequencies,
+                type: 'bar',
+                marker: { color: 'rgba(100,150,250,0.7)' },
+                hovertemplate: 'Range: %{x}<br>Percentage: %{y:.2f}%<extra></extra>',
+            };
+
+            const layout = {
+                xaxis: { title: { text: 'EVI values', font: { size: 16 } } },
+                yaxis: { 
+                    title: { text: 'Percentage (%)', font: { size: 16 } }
+                },
+                bargap: 0.05
+            };
+
+            Plotly.newPlot('histogram', [trace], layout);
+      })
+  </script>
+</body>
+</html>
