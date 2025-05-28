@@ -37,19 +37,78 @@
             attribution: '© Czech Office for Surveying, Mapping and Cadastre'
         }).addTo(map);
 
+
+        // Define a color scale function for EVI values you can adjust these colors and classes as needed
+        function getColor(dnValues) {
+        return  dnValues > 0.85 ? '#042117' : 
+                dnValues > 0.75 ? '#0E411E' :
+                dnValues > 0.65 ? '#1E6126' :
+                dnValues > 0.55 ? '#408031' :
+                dnValues > 0.45 ? '#6CA045' :  
+                dnValues > 0.35 ? '#A3C060' :  
+                dnValues > 0.25 ? '#D2D682' :  
+                dnValues > 0.0 ? '#FFE9A6' :  
+                            '#000000';   // no data or negative values
+        }
+
+        // Style function for each feature
+        function style(feature) {
+        return {
+            fillColor: getColor(feature.properties.DN),
+            weight: 0.1,
+            opacity: 0.1,
+            fillOpacity: 0.8
+        };
+        }
+
+
         //Create GEOJSON layer and add to the map
-        const geojsonUrl = 'https://api-dev.dynacrop.space/api/file/geojson/f03a6ddf-3b5c-5027-ab52-7f7f0cc7c60a.geojson';
+        const geojsonUrl = 'https://api-dev.dynacrop.space/api/file/geojson/92269d7d-61b4-5aa9-aba0-793b24e6a7a1.geojson';
         fetch(geojsonUrl)
             .then(response => response.json())
             .then(data => {
                 const geojsonPolygon = L.geoJSON(data, {
-                style: {
-                    color: 'blue',
-                    weight: 0.5,
-                    fillOpacity: 0.1
-                }
+                style: style
                 }).addTo(map);
             });
+
+        // Create and add legend
+
+        const legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const grades = [0, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85];
+            const labels = [
+            '≤ 0.25',
+            '0.26 – 0.35',
+            '0.36 – 0.45',
+            '0.46 – 0.55',
+            '0.56 – 0.65',
+            '0.66 – 0.75',
+            '0.76 – 0.85',
+            '> 0.85'
+            ];
+
+            div.style.background = 'rgba(0,0,0,0.8)';
+            div.style.color = 'white';
+            div.style.padding = '8px 12px';
+            div.style.borderRadius = '6px';
+            div.style.fontSize = '14px';
+
+            // loop through intervals and generate a label with a colored square for each interval
+            for (let i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + getColor(grades[i] + 0.01) + ';width:18px;height:18px;display:inline-block;margin-right:8px"></i> ' +
+                    labels[i] + '<br>';
+            }
+
+            return div;
+        };
+
+        legend.addTo(map);
+
+
 
         // Add layer control
         const baseLayers = {
