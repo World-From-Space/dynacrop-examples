@@ -64,7 +64,8 @@
             const wktBounds = wktGeojsonPolygon.getBounds();
 
         // Create PNG layer
-        const pngImageUrl = 'https://api-dev.dynacrop.space/api/file/png/495c6ab8-fd7e-5b17-9cb2-a646e99cd515.png?style=zonation&min_value=1&max_value=6&num_values=5';
+        //const pngImageUrl = 'https://api-dev.dynacrop.space/api/file/png/495c6ab8-fd7e-5b17-9cb2-a646e99cd515.png?style=zonation&min_value=1&max_value=6&num_values=5';
+        const pngImageUrl = 'data/png_example.png';
         const pngLayer = L.imageOverlay(pngImageUrl, wktBounds)
 
         // Add layer control

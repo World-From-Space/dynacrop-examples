@@ -61,7 +61,8 @@
         }
 
         //Create SHP layer and add to the map
-        const shpfileUrl = 'https://api-dev.dynacrop.space/api/file/shp/3f8a2ffd-2140-595e-86fc-5bc4408e73c0.zip';
+        //const shpfileUrl = 'https://api-dev.dynacrop.space/api/file/shp/3f8a2ffd-2140-595e-86fc-5bc4408e73c0.zip';
+        const shpfileUrl = 'data/shp_example_zonation.zip';
         shp(shpfileUrl).then(function (geojson) {
             const shpLayer = L.geoJSON(geojson, {style: style}).addTo(map);
         });

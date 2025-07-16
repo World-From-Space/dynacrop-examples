@@ -35,7 +35,8 @@
         }).addTo(map);
 
         //Create TIFF layer and add to the map
-        const tiffImageUrl = "https://api-dev.dynacrop.space/api/file/color/c7c23488-835e-540c-bdcf-ca2963dd071f.tiff?style=zonation&min_value=1&max_value=6&num_values=5";
+        //const tiffImageUrl = "https://api-dev.dynacrop.space/api/file/color/c7c23488-835e-540c-bdcf-ca2963dd071f.tiff?style=zonation&min_value=1&max_value=6&num_values=5";      
+        const tiffImageUrl = 'data/tiff_example.tiff';
         fetch(tiffImageUrl)
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => {
