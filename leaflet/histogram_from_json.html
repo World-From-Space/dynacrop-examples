@@ -19,14 +19,12 @@
 </head>
 
 <body>
-  <h2 style="text-align: center;">Zonation Histogram </h2>
+  <h2 style="text-align: center;">Histogram of EVI values</h2>
   <div id="histogram"></div>
 
   <script>
-    // Replace this URL with your actual JSON URL
-    const dataUrl = 'https://api-dev.dynacrop.space/api/v2/frequencies/92269d7d-61b4-5aa9-aba0-793b24e6a7a1?type=observation&bins=10';
-    // Fetch data and display histogram with percentages
-    fetch(dataUrl)
+    // Fetch data and display histogram
+    fetch('data/histogram_example.json')
         .then(response => response.json())
         .then(json => {
             const binLabels = [];
@@ -70,7 +68,7 @@
             };
 
             Plotly.newPlot('histogram', [trace], layout);
-      })
+        })
   </script>
 </body>
 </html>
